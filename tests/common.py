@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from aiohttp_tus.data import TusConfig
 from multidict import CIMultiDict
+
+from aiohttp_tus.data import TusConfig
 
 
 TEST_CONFIG = TusConfig(upload_path=Path(__file__).parent / "test-data")

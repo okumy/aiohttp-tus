@@ -70,7 +70,7 @@ class Resource:
 
     def save(self, *, config: TusConfig, chunk: bytes) -> Tuple[Path, int]:
         path = get_resource_path(config=config, uid=self.uid)
-        with open(path, 'wb+') as handler:
+        with open(path, "wb+") as handler:
             handler.seek(self.offset)
             chunk_size = handler.write(chunk)
         return (path, chunk_size)

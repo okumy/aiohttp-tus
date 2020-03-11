@@ -3,7 +3,7 @@ from pathlib import Path
 from aiohttp import web
 
 from . import views
-from .constants import APP_TUS_CONFIG_KEY, ROUTE_UPLOAD, ROUTE_RESOURCE
+from .constants import APP_TUS_CONFIG_KEY, ROUTE_RESOURCE, ROUTE_UPLOAD
 from .data import TusConfig
 
 

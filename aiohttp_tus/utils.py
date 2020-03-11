@@ -6,7 +6,7 @@ from multidict import CIMultiDict
 
 from .annotations import DictStrBytes, MappingStrBytes
 from .constants import APP_TUS_CONFIG_KEY
-from .data import Resource, get_resource_path
+from .data import get_resource_path, Resource
 
 
 logger = logging.getLogger(__name__)
@@ -55,4 +55,4 @@ def parse_upload_metadata(metadata_header: str) -> MappingStrBytes:
         key, value = item.split()
         metadata[key] = base64.b64decode(value)
 
-    return CIMultiDict(metadata)  # type: ignore
+    return CIMultiDict(metadata)

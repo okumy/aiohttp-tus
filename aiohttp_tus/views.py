@@ -133,7 +133,7 @@ async def upload_options(request: web.Request) -> web.Response:
         headers={
             **constants.BASE_HEADERS,
             constants.HEADER_TUS_EXTENSION: ",".join(constants.TUS_API_EXTENSIONS),
-            constants.HEADER_TUS_MAX_SIZE: constants.TUS_MAX_FILE_SIZE,
+            constants.HEADER_TUS_MAX_SIZE: str(constants.TUS_MAX_FILE_SIZE),
         },
     )
 

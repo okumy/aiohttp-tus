@@ -20,7 +20,7 @@ To test how aiohttp_tus uploading files,
 
 .. code-block:: bash
 
-    poetry run tus-upload --chunk-size=1000000 /path/to/large-file http://localhost:8300/uploads
+    poetry run tus-upload --chunk-size=1000000 /large-file http://localhost:8300/uploads
 
 3. Check that file uploaded and is available at ``./test-uploads/aiohttp_tus``
    directory
@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import List
 
 from aiohttp import web
+
 from aiohttp_tus import setup_tus
 
 

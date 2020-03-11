@@ -1,6 +1,10 @@
 import tempfile
-from contextlib import asynccontextmanager
 from pathlib import Path
+
+try:
+    from contextlib import asynccontextmanager
+except ImportError:
+    from async_generator import asynccontextmanager
 
 import pytest
 import tus
