@@ -27,7 +27,7 @@ speedups = ["aiodns", "brotlipy", "cchardet"]
 [[package]]
 category = "dev"
 description = "Async generators and context managers for Python 3.5+"
-marker = "python_version == \"3.6\""
+marker = "python_version >= \"3.6\" and python_version < \"3.7\""
 name = "async-generator"
 optional = false
 python-versions = ">=3.5"
@@ -369,7 +369,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "435622b607b17380c7e8d9dde61b1c73769da58be63b5fe5ea5adf1e11cc6c49"
+content-hash = "69f6675e628db8a3eb84e83743b6ccf6c3bef56d5f3b8aed6d095b6e4240ef50"
 python-versions = "^3.6"
 
 [metadata.files]
