@@ -98,7 +98,7 @@ async def start_upload(request: web.Request) -> web.Response:
     headers[constants.HEADER_LOCATION] = str(
         request.url.join(
             request.app.router[constants.ROUTE_RESOURCE].url_for(
-                resource_uid=resource.uid
+                **request.match_info, resource_uid=resource.uid
             )
         )
     )

@@ -9,6 +9,7 @@ except ImportError:
 import pytest
 import tus
 from aiohttp import web
+from aiohttp.test_utils import TestClient
 
 from aiohttp_tus import setup_tus
 from aiohttp_tus.constants import APP_TUS_CONFIG_KEY
@@ -21,21 +22,26 @@ TEST_DATA_PATH = Path(__file__).parent / "test-data"
 @pytest.fixture
 def aiohttp_test_client(aiohttp_client):
     @asynccontextmanager
-    async def factory():
+    async def factory(*, upload_url: str) -> TestClient:
         with tempfile.TemporaryDirectory(prefix="aiohttp_tus") as temp_path:
-            upload_path = Path(temp_path)
-            yield await aiohttp_client(create_app(upload_path=upload_path))
+            app = setup_tus(
+                web.Application(), upload_path=Path(temp_path), upload_url=upload_url
+            )
+            yield await aiohttp_client(app)
 
     return factory
 
 
-def create_app(*, upload_path: Path) -> web.Application:
-    return setup_tus(web.Application(), upload_url="/uploads", upload_path=upload_path)
-
-
-async def test_upload(aiohttp_test_client, loop):
-    async with aiohttp_test_client() as client:
-        upload_url = f"http://{client.host}:{client.port}/uploads"
+@pytest.mark.parametrize(
+    "upload_url, tus_upload_url",
+    (
+        ("/uploads", "/uploads"),
+        (r"/user/{username}/uploads", "/user/playpauseandtop/uploads"),
+    ),
+)
+async def test_upload(aiohttp_test_client, loop, upload_url, tus_upload_url):
+    async with aiohttp_test_client(upload_url=upload_url) as client:
+        upload_url = f"http://{client.host}:{client.port}{tus_upload_url}"
         test_upload_path = TEST_DATA_PATH / "hello.txt"
 
         with open(test_upload_path, "rb") as handler:

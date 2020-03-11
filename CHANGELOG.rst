@@ -1,3 +1,9 @@
+1.0.0a1 (In Development)
+========================
+
+- Ensure named upload URLs (e.g. ``/user/{username}/uploads``) works as well
+- Ensure package is typed by adding ``py.typed``
+
 1.0.0a0 (2020-03-11)
 ====================
 
