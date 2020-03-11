@@ -1,0 +1,63 @@
+[tool.black]
+line_length = 88
+
+[tool.coverage.run]
+branch = true
+source = ["aiohttp_tus"]
+
+[tool.coverage.paths]
+source = ["aiohttp_tus/"]
+
+[tool.coverage.report]
+fail_under = 75
+skip_covered = true
+show_missing = true
+
+[tool.poetry]
+name = "aiohttp-tus"
+version = "1.0.0a0"
+description = "tus.io protocol implementation for aiohttp.web applications"
+authors = ["Igor Davydenko <iam@igordavydenko.com>"]
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+aiohttp = "^3.6.2"
+
+[tool.poetry.dev-dependencies]
+coverage = {extras = ["toml"], version = "^5.0.3"}
+pytest = "^5.3.5"
+pytest-aiohttp = "^0.3.0"
+pytest-asyncio = "^0.10.0"
+pytest-cov = "^2.8.1"
+"tus.py" = "^1.3.4"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py36,py37,py38
+skipsdist = True
+
+[gh-actions]
+python =
+    3.6: py36
+    3.7: py37
+    3.8: py38
+
+[testenv]
+passenv =
+    PYTHONPATH
+    PYTEST_ADDOPTS
+setenv =
+    PYTHONPATH=.
+skip_install = True
+whitelist_externals = poetry
+commands_pre =
+    poetry install
+commands =
+    poetry run python -m pytest tests/ --cov --no-cov-on-fail
+"""
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
