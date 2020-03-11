@@ -21,6 +21,10 @@ For uploading large files, please consider using
 Quickstart
 ==========
 
+Code belows shows how to enable tus-compatible uploads on ``/uploads`` URL for
+``aiohttp.web`` application. After upload, files will be available at ``../uploads``
+directory.
+
 .. code-block:: python
 
     from pathlib import Path
@@ -29,9 +33,8 @@ Quickstart
     from aiohttp_tus import setup_tus
 
 
-    app = web.Application()
-    setup_tus(
-        app,
+    app = setup_tus(
+        web.Application(),
         upload_url="/uploads",
         upload_path=Path(__file__).parent.parent / "uploads",
     )
