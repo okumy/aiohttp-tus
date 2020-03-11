@@ -2,6 +2,10 @@
 aiohttp-tus
 ===========
 
+.. image:: https://github.com/playpauseandstop/aiohttp-tus/workflows/ci/badge.svg
+   :target: https://github.com/playpauseandstop/aiohttp-tus/actions?query=workflow%3A%22ci%22
+   :alt: CI Workflow
+
 `tus.io <https://tus.io>`_ server implementation for
 `aiohttp.web <https://docs.aiohttp.org/en/stable/web.html>`_ applications.
 
