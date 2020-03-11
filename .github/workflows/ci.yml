@@ -43,6 +43,7 @@ jobs:
       matrix:
         python-version: ["3.6", "3.7", "3.8"]
 
+    needs: "dev"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -83,6 +84,7 @@ jobs:
   package:
     name: "Build & deploy package"
 
+    needs: "test"
     runs-on: "ubuntu-latest"
 
     steps:
