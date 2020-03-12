@@ -1,5 +1,9 @@
-from typing import Any, Dict, Mapping
+from typing import Any, Callable, Dict, Mapping
 
+from aiohttp.web_middlewares import _Handler as Handler
+
+
+Decorator = Callable[[Handler], Handler]
 
 DictStrAny = Dict[str, Any]
 DictStrBytes = Dict[str, bytes]
