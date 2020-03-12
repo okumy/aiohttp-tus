@@ -22,10 +22,13 @@ TEST_DATA_PATH = Path(__file__).parent / "test-data"
 @pytest.fixture
 def aiohttp_test_client(aiohttp_client):
     @asynccontextmanager
-    async def factory(*, upload_url: str) -> TestClient:
+    async def factory(*, upload_url: str, upload_suffix: str = None) -> TestClient:
         with tempfile.TemporaryDirectory(prefix="aiohttp_tus") as temp_path:
+            base_path = Path(temp_path)
             app = setup_tus(
-                web.Application(), upload_path=Path(temp_path), upload_url=upload_url
+                web.Application(),
+                upload_path=base_path / upload_suffix if upload_suffix else base_path,
+                upload_url=upload_url,
             )
             yield await aiohttp_client(app)
 
@@ -33,14 +36,24 @@ def aiohttp_test_client(aiohttp_client):
 
 
 @pytest.mark.parametrize(
-    "upload_url, tus_upload_url",
+    "upload_url, upload_suffix, tus_upload_url, match_info",
     (
-        ("/uploads", "/uploads"),
-        (r"/user/{username}/uploads", "/user/playpauseandtop/uploads"),
+        ("/uploads", None, "/uploads", {}),
+        (r"/user/{username}/uploads", None, "/user/playpauseanddtop/uploads", {}),
+        (
+            r"/user/{username}/uploads",
+            r"{username}",
+            "/user/playpauseandstop/uploads",
+            {"username": "playpauseandstop"},
+        ),
     ),
 )
-async def test_upload(aiohttp_test_client, loop, upload_url, tus_upload_url):
-    async with aiohttp_test_client(upload_url=upload_url) as client:
+async def test_upload(
+    aiohttp_test_client, loop, upload_url, upload_suffix, tus_upload_url, match_info,
+):
+    async with aiohttp_test_client(
+        upload_url=upload_url, upload_suffix=upload_suffix
+    ) as client:
         upload_url = f"http://{client.host}:{client.port}{tus_upload_url}"
         test_upload_path = TEST_DATA_PATH / "hello.txt"
 
@@ -48,6 +61,6 @@ async def test_upload(aiohttp_test_client, loop, upload_url, tus_upload_url):
             await loop.run_in_executor(None, tus.upload, handler, upload_url)
 
         config: TusConfig = client.app[APP_TUS_CONFIG_KEY]
-        expected_upload_path = config.upload_path / "hello.txt"
+        expected_upload_path = config.resolve_upload_path(match_info) / "hello.txt"
         assert expected_upload_path.exists()
         assert expected_upload_path.read_bytes() == test_upload_path.read_bytes()

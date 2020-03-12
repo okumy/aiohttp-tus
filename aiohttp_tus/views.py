@@ -20,8 +20,9 @@ async def delete_resource(request: web.Request) -> web.Response:
 
     # Remove resource file and its metadata
     config: TusConfig = request.config_dict[constants.APP_TUS_CONFIG_KEY]
-    resource.delete(config=config)
-    resource.delete_metadata(config=config)
+    match_info = request.match_info
+    resource.delete(config=config, match_info=match_info)
+    resource.delete_metadata(config=config, match_info=match_info)
 
     return web.Response(status=204, headers=constants.BASE_HEADERS)
 
@@ -76,9 +77,10 @@ async def start_upload(request: web.Request) -> web.Response:
     )
 
     # Save resource and its metadata
+    match_info = request.match_info
     try:
-        resource.save(config=config, chunk=b"\0")
-        resource.save_metadata(config=config)
+        resource.save(config=config, match_info=match_info, chunk=b"\0")
+        resource.save_metadata(config=config, match_info=match_info)
     # In case if file system is not able to store given files - abort the upload
     except IOError:
         logger.error(
@@ -154,17 +156,18 @@ async def upload_resource(request: web.Request) -> web.Response:
 
     # Save current chunk to the resource
     config: TusConfig = request.config_dict[constants.APP_TUS_CONFIG_KEY]
-    resource.save(config=config, chunk=await request.read())
+    match_info = request.match_info
+    resource.save(config=config, match_info=match_info, chunk=await request.read())
 
     # If this is a final chunk - complete upload
     chunk_size = int(request.headers.get(constants.HEADER_CONTENT_LENGTH) or 0)
     next_offset = resource.offset + chunk_size
     if next_offset == resource.file_size:
-        resource.complete(config=config)
+        resource.complete(config=config, match_info=match_info)
     # But if it is not - store new metadata
     else:
         next_resource = attr.evolve(resource, offset=next_offset)
-        next_resource.save_metadata(config=config)
+        next_resource.save_metadata(config=config, match_info=match_info)
 
     # Return upload headers
     return web.Response(

@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 def get_resource(request: web.Request) -> Resource:
     return Resource.from_metadata(
-        config=request.config_dict[APP_TUS_CONFIG_KEY],
-        uid=request.match_info["resource_uid"],
+        config=request.config_dict[APP_TUS_CONFIG_KEY], match_info=request.match_info,
     )
 
 
@@ -34,7 +33,9 @@ def get_resource_or_410(request: web.Request) -> Resource:
     try:
         resource = get_resource(request)
         if not get_resource_path(
-            config=request.config_dict[APP_TUS_CONFIG_KEY], uid=resource.uid
+            config=request.config_dict[APP_TUS_CONFIG_KEY],
+            match_info=request.match_info,
+            uid=resource.uid,
         ).exists():
             raise IOError(f"{resource.uid} does not exist")
     except IOError:

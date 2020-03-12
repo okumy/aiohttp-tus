@@ -1,6 +1,7 @@
 1.0.0a1 (In Development)
 ========================
 
+- Allow to upload on named upload paths, when using named upload URLs
 - Ensure named upload URLs (e.g. ``/user/{username}/uploads``) works as well
 - Ensure package is typed by adding ``py.typed``
 
