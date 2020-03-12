@@ -1,5 +1,5 @@
-1.0.0a1 (In Development)
-========================
+1.0.0a1 (2020-03-12)
+====================
 
 - Allow to decorate upload views for authentication or other (for example *to check
   whether entity for upload exists or not*) needs
