@@ -16,7 +16,15 @@ from aiohttp_tus import setup_tus
 from aiohttp_tus.annotations import Decorator, Handler
 from aiohttp_tus.constants import APP_TUS_CONFIG_KEY
 from aiohttp_tus.data import Config
-from tests.common import get_upload_url, TEST_FILE_NAME, TEST_FILE_PATH, TEST_UPLOAD_URL
+from tests.common import (
+    get_upload_url,
+    TEST_CHUNK_SIZE,
+    TEST_FILE_NAME,
+    TEST_FILE_PATH,
+    TEST_SCREENSHOT_NAME,
+    TEST_SCREENSHOT_PATH,
+    TEST_UPLOAD_URL,
+)
 
 
 SECRET_TOKEN = "secret-token"
@@ -26,7 +34,11 @@ SECRET_TOKEN = "secret-token"
 def aiohttp_test_client(aiohttp_client):
     @asynccontextmanager
     async def factory(
-        *, upload_url: str, upload_suffix: str = None, decorator: Decorator = None
+        *,
+        upload_url: str,
+        upload_suffix: str = None,
+        allow_overwrite_files: bool = False,
+        decorator: Decorator = None,
     ) -> TestClient:
         with tempfile.TemporaryDirectory(prefix="aiohttp_tus") as temp_path:
             base_path = Path(temp_path)
@@ -34,6 +46,7 @@ def aiohttp_test_client(aiohttp_client):
                 web.Application(),
                 upload_path=base_path / upload_suffix if upload_suffix else base_path,
                 upload_url=upload_url,
+                allow_overwrite_files=allow_overwrite_files,
                 decorator=decorator,
             )
             yield await aiohttp_client(app)
@@ -84,6 +97,37 @@ async def test_decorated_upload_403(aiohttp_test_client, loop):
                 )
 
 
+async def test_overwrite_file_allowed(aiohttp_test_client, loop):
+    upload = partial(tus.upload, file_name=TEST_FILE_NAME)
+
+    async with aiohttp_test_client(
+        upload_url=TEST_UPLOAD_URL, allow_overwrite_files=True
+    ) as client:
+        tus_upload_url = get_upload_url(client, TEST_UPLOAD_URL)
+
+        with open(TEST_FILE_PATH, "rb") as handler:
+            await loop.run_in_executor(None, upload, handler, tus_upload_url)
+
+        with open(TEST_FILE_PATH, "rb") as handler:
+            await loop.run_in_executor(None, upload, handler, tus_upload_url)
+
+
+async def test_overwrite_file_disallowed(aiohttp_test_client, loop):
+    upload = partial(tus.upload, file_name=TEST_FILE_NAME)
+
+    async with aiohttp_test_client(
+        upload_url=TEST_UPLOAD_URL, allow_overwrite_files=False
+    ) as client:
+        tus_upload_url = get_upload_url(client, TEST_UPLOAD_URL)
+
+        with open(TEST_FILE_PATH, "rb") as handler:
+            await loop.run_in_executor(None, upload, handler, tus_upload_url)
+
+        with pytest.raises(tus.TusError):
+            with open(TEST_FILE_PATH, "rb") as handler:
+                await loop.run_in_executor(None, upload, handler, tus_upload_url)
+
+
 @pytest.mark.parametrize(
     "upload_url, upload_suffix, tus_upload_url, match_info",
     (
@@ -114,3 +158,15 @@ async def test_upload(
         expected_upload_path = config.resolve_upload_path(match_info) / TEST_FILE_NAME
         assert expected_upload_path.exists()
         assert expected_upload_path.read_bytes() == TEST_FILE_PATH.read_bytes()
+
+
+async def test_upload_large_file(aiohttp_test_client, loop):
+    upload = partial(
+        tus.upload, file_name=TEST_SCREENSHOT_NAME, chunk_size=TEST_CHUNK_SIZE
+    )
+
+    async with aiohttp_test_client(upload_url=TEST_UPLOAD_URL) as client:
+        with open(TEST_SCREENSHOT_PATH, "rb") as handler:
+            await loop.run_in_executor(
+                None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
+            )

@@ -49,7 +49,7 @@ async def start_upload(request: web.Request) -> web.Response:
         logger.warning(
             "Wrong headers for start upload view", extra={"headers": request.headers}
         )
-        raise web.HTTPServerError(
+        raise web.HTTPInternalServerError(
             text="Received file upload for unsupported file transfer protocol"
         )
 
@@ -92,7 +92,7 @@ async def start_upload(request: web.Request) -> web.Response:
                 "upload_path": config.upload_path.absolute(),
             },
         )
-        raise web.HTTPServerError(
+        raise web.HTTPInternalServerError(
             text="Unexpected error on uploading file", headers=headers
         )
 

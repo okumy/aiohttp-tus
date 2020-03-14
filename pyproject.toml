@@ -9,7 +9,7 @@ source = ["aiohttp_tus"]
 source = ["aiohttp_tus/"]
 
 [tool.coverage.report]
-fail_under = 75
+fail_under = 85
 skip_covered = true
 show_missing = true
 

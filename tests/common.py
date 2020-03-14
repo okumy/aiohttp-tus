@@ -8,9 +8,14 @@ from aiohttp_tus.data import Config
 
 rel = Path(__file__).parent
 
+TEST_CHUNK_SIZE = 10240
+
 TEST_DATA_PATH = rel / "test-data"
 TEST_FILE_NAME = "hello.txt"
 TEST_FILE_PATH = TEST_DATA_PATH / TEST_FILE_NAME
+
+TEST_SCREENSHOT_NAME = "screenshot.png"
+TEST_SCREENSHOT_PATH = TEST_DATA_PATH / TEST_SCREENSHOT_NAME
 
 TEST_UPLOAD_PATH = rel / "test-uploads"
 TEST_UPLOAD_URL = "/uploads"

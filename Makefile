@@ -61,4 +61,5 @@ test-app:
 	$(PYTHON) -m aiohttp.web --port $(TEST_APP_PORT) tests.app:create_app
 
 test-only:
+	rm -rf tests/test-uploads/
 	TOXENV=$(TOXENV) $(TOX) $(TOX_ARGS) -- $(TEST_ARGS)
