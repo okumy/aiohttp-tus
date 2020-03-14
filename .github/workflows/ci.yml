@@ -37,13 +37,13 @@ jobs:
         run: "poetry run python -c 'import aiohttp_tus'"
 
   test:
+    needs: "dev"
     name: "Python ${{ matrix.python-version }}"
 
     strategy:
       matrix:
         python-version: ["3.6", "3.7", "3.8"]
 
-    needs: "dev"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -82,9 +82,9 @@ jobs:
           python -m tox
 
   package:
+    needs: "test"
     name: "Build & deploy package"
 
-    needs: "test"
     runs-on: "ubuntu-latest"
 
     steps:
