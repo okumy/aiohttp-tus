@@ -70,7 +70,9 @@ class Resource:
             config=config, match_info=match_info, file_name=self.file_name
         )
 
-        shutil.move(resource_path, file_path)
+        # Python 3.5-3.8 requires to have source as string.
+        # More details: https://bugs.python.org/issue32689
+        shutil.move(str(resource_path), file_path)
         self.delete_metadata(config=config, match_info=match_info)
 
         return file_path
