@@ -15,11 +15,11 @@ from aiohttp.test_utils import TestClient
 from aiohttp_tus import setup_tus
 from aiohttp_tus.annotations import Decorator, Handler
 from aiohttp_tus.constants import APP_TUS_CONFIG_KEY
-from aiohttp_tus.data import TusConfig
+from aiohttp_tus.data import Config
+from tests.common import get_upload_url, TEST_FILE_NAME, TEST_FILE_PATH, TEST_UPLOAD_URL
 
 
 SECRET_TOKEN = "secret-token"
-TEST_DATA_PATH = Path(__file__).parent / "test-data"
 
 
 @pytest.fixture
@@ -41,10 +41,6 @@ def aiohttp_test_client(aiohttp_client):
     return factory
 
 
-def get_upload_url(client: TestClient, upload_url: str) -> str:
-    return f"http://{client.host}:{client.port}{upload_url}"
-
-
 def login_required(handler: Handler) -> Handler:
     async def decorator(request: web.Request) -> web.StreamResponse:
         header = request.headers.get(hdrs.AUTHORIZATION)
@@ -56,40 +52,42 @@ def login_required(handler: Handler) -> Handler:
 
 
 async def test_decorated_upload_200(aiohttp_test_client, loop):
+    upload = partial(
+        tus.upload,
+        file_name=TEST_FILE_NAME,
+        headers={"Authorization": "Token secret-token"},
+    )
+
     async with aiohttp_test_client(
-        upload_url="/uploads", decorator=login_required
+        upload_url=TEST_UPLOAD_URL, decorator=login_required
     ) as client:
-        upload = partial(
-            tus.upload,
-            file_name="hello.txt",
-            headers={"Authorization": "Token secret-token"},
-        )
-        with open(TEST_DATA_PATH / "hello.txt", "rb") as handler:
+        with open(TEST_FILE_PATH, "rb") as handler:
             await loop.run_in_executor(
-                None, upload, handler, get_upload_url(client, "/uploads")
+                None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
             )
 
 
 async def test_decorated_upload_403(aiohttp_test_client, loop):
+    upload = partial(
+        tus.upload,
+        file_name=TEST_FILE_NAME,
+        headers={"Authorization": "Token not-secret-token"},
+    )
+
     async with aiohttp_test_client(
-        upload_url="/uploads", decorator=login_required
+        upload_url=TEST_UPLOAD_URL, decorator=login_required
     ) as client:
-        upload = partial(
-            tus.upload,
-            file_name="hello.txt",
-            headers={"Authorization": "Token not-secret-token"},
-        )
-        with open(TEST_DATA_PATH / "hello.txt", "rb") as handler:
+        with open(TEST_FILE_PATH, "rb") as handler:
             with pytest.raises(tus.TusError):
                 await loop.run_in_executor(
-                    None, upload, handler, get_upload_url(client, "/uploads")
+                    None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
                 )
 
 
 @pytest.mark.parametrize(
     "upload_url, upload_suffix, tus_upload_url, match_info",
     (
-        ("/uploads", None, "/uploads", {}),
+        (TEST_UPLOAD_URL, None, TEST_UPLOAD_URL, {}),
         (r"/user/{username}/uploads", None, "/user/playpauseanddtop/uploads", {}),
         (
             r"/user/{username}/uploads",
@@ -102,18 +100,17 @@ async def test_decorated_upload_403(aiohttp_test_client, loop):
 async def test_upload(
     aiohttp_test_client, loop, upload_url, upload_suffix, tus_upload_url, match_info,
 ):
+    upload = partial(tus.upload, file_name=TEST_FILE_NAME)
+
     async with aiohttp_test_client(
         upload_url=upload_url, upload_suffix=upload_suffix
     ) as client:
-        test_upload_path = TEST_DATA_PATH / "hello.txt"
-
-        upload = partial(tus.upload, file_name="hello.txt")
-        with open(test_upload_path, "rb") as handler:
+        with open(TEST_FILE_PATH, "rb") as handler:
             await loop.run_in_executor(
                 None, upload, handler, get_upload_url(client, tus_upload_url)
             )
 
-        config: TusConfig = client.app[APP_TUS_CONFIG_KEY]
-        expected_upload_path = config.resolve_upload_path(match_info) / "hello.txt"
+        config: Config = client.app[APP_TUS_CONFIG_KEY][upload_url]
+        expected_upload_path = config.resolve_upload_path(match_info) / TEST_FILE_NAME
         assert expected_upload_path.exists()
-        assert expected_upload_path.read_bytes() == test_upload_path.read_bytes()
+        assert expected_upload_path.read_bytes() == TEST_FILE_PATH.read_bytes()

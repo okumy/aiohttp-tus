@@ -1,11 +1,20 @@
 from pathlib import Path
 
+from aiohttp.test_utils import TestClient
 from multidict import CIMultiDict
 
-from aiohttp_tus.data import TusConfig
+from aiohttp_tus.data import Config
 
 
-TEST_CONFIG = TusConfig(upload_path=Path(__file__).parent / "test-data")
+rel = Path(__file__).parent
+
+TEST_DATA_PATH = rel / "test-data"
+TEST_FILE_NAME = "hello.txt"
+TEST_FILE_PATH = TEST_DATA_PATH / TEST_FILE_NAME
+
+TEST_UPLOAD_PATH = rel / "test-uploads"
+TEST_UPLOAD_URL = "/uploads"
+TEST_CONFIG = Config(upload_path=TEST_UPLOAD_PATH, upload_url=TEST_UPLOAD_URL)
 
 TEST_UPLOAD_METADATA_HEADER = "Content-Type dGV4dC9wbGFpbg==, Filename aGVsbG8udHh0"
 TEST_UPLOAD_METADATA_HEADERS = CIMultiDict(
@@ -14,3 +23,7 @@ TEST_UPLOAD_METADATA_HEADERS = CIMultiDict(
 TEST_UPLOAD_METADATA = CIMultiDict(
     {"Content-Type": b"text/plain", "Filename": b"hello.txt"}
 )
+
+
+def get_upload_url(client: TestClient, upload_url: str) -> str:
+    return f"http://{client.host}:{client.port}{upload_url}"

@@ -1,24 +1,27 @@
+import base64
 import json
 import shutil
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Tuple
+from typing import Tuple
 
 import attr
 from aiohttp import web
 
-from .annotations import DictStrAny
+from .annotations import DictStrAny, JsonDumps, JsonLoads
+from .constants import APP_TUS_CONFIG_KEY
 
 
 @attr.dataclass(frozen=True, slots=True)
-class TusConfig:
+class Config:
     upload_path: Path
+    upload_url: str
 
     allow_overwrite_files: bool = False
     mkdir_mode: int = 0o755
 
-    json_dumps: Callable[[Any], str] = json.dumps
-    json_loads: Callable[[str], Any] = json.loads
+    json_dumps: JsonDumps = json.dumps
+    json_loads: JsonLoads = json.loads
 
     def resolve_metadata_path(self, match_info: web.UrlMappingMatchInfo) -> Path:
         metadata_path = self.resolve_upload_path(match_info) / ".metadata"
@@ -33,6 +36,22 @@ class TusConfig:
     def resolve_upload_path(self, match_info: web.UrlMappingMatchInfo) -> Path:
         return Path(str(self.upload_path.absolute()).format(**match_info))
 
+    @property
+    def resource_tus_resource_name(self) -> str:
+        return f"tus_resource_{self.upload_url_id}"
+
+    @property
+    def resource_tus_upload_name(self) -> str:
+        return f"tus_upload_{self.upload_url_id}"
+
+    @property
+    def upload_url_id(self) -> str:
+        return (
+            base64.urlsafe_b64encode(self.upload_url.encode("utf-8"))
+            .decode("utf-8")
+            .replace("=", "_")
+        )
+
 
 @attr.dataclass(frozen=True, slots=True)
 class Resource:
@@ -43,9 +62,7 @@ class Resource:
 
     uid: str = attr.Factory(lambda: str(uuid.uuid4()))
 
-    def complete(
-        self, *, config: TusConfig, match_info: web.UrlMappingMatchInfo
-    ) -> Path:
+    def complete(self, *, config: Config, match_info: web.UrlMappingMatchInfo) -> Path:
         resource_path = get_resource_path(
             config=config, match_info=match_info, uid=self.uid
         )
@@ -58,13 +75,13 @@ class Resource:
 
         return file_path
 
-    def delete(self, *, config: TusConfig, match_info: web.UrlMappingMatchInfo) -> bool:
+    def delete(self, *, config: Config, match_info: web.UrlMappingMatchInfo) -> bool:
         return delete_path(
             get_resource_path(config=config, match_info=match_info, uid=self.uid)
         )
 
     def delete_metadata(
-        self, *, config: TusConfig, match_info: web.UrlMappingMatchInfo
+        self, *, config: Config, match_info: web.UrlMappingMatchInfo
     ) -> int:
         return delete_path(
             get_resource_metadata_path(
@@ -74,7 +91,7 @@ class Resource:
 
     @classmethod
     def from_metadata(
-        cls, *, config: TusConfig, match_info: web.UrlMappingMatchInfo
+        cls, *, config: Config, match_info: web.UrlMappingMatchInfo
     ) -> "Resource":
         uid = match_info["resource_uid"]
         path = get_resource_metadata_path(config=config, match_info=match_info, uid=uid)
@@ -88,7 +105,7 @@ class Resource:
         )
 
     def save(
-        self, *, config: TusConfig, match_info: web.UrlMappingMatchInfo, chunk: bytes
+        self, *, config: Config, match_info: web.UrlMappingMatchInfo, chunk: bytes
     ) -> Tuple[Path, int]:
         path = get_resource_path(config=config, match_info=match_info, uid=self.uid)
         with open(path, "wb+") as handler:
@@ -97,7 +114,7 @@ class Resource:
         return (path, chunk_size)
 
     def save_metadata(
-        self, *, config: TusConfig, match_info: web.UrlMappingMatchInfo
+        self, *, config: Config, match_info: web.UrlMappingMatchInfo
     ) -> Tuple[Path, DictStrAny]:
         path = get_resource_metadata_path(
             config=config, match_info=match_info, uid=self.uid
@@ -116,19 +133,52 @@ def delete_path(path: Path) -> bool:
     return False
 
 
+def get_config(request: web.Request) -> Config:
+    route = request.match_info.route
+
+    container = request.config_dict[APP_TUS_CONFIG_KEY]
+    info = route.get_info()
+
+    config_key = info.get("formatter") or info["path"]
+    if route.resource.name.startswith("tus_resource_"):
+        config_key = get_upload_url(config_key)
+
+    try:
+        return container[config_key]  # type: ignore
+    except KeyError:
+        raise KeyError("Unable to find aiohttp_tus config for specified URL")
+
+
 def get_file_path(
-    *, config: TusConfig, match_info: web.UrlMappingMatchInfo, file_name: str
+    *, config: Config, match_info: web.UrlMappingMatchInfo, file_name: str
 ) -> Path:
     return config.resolve_upload_path(match_info) / file_name
 
 
 def get_resource_path(
-    *, config: TusConfig, match_info: web.UrlMappingMatchInfo, uid: str
+    *, config: Config, match_info: web.UrlMappingMatchInfo, uid: str
 ) -> Path:
     return config.resolve_resources_path(match_info) / uid
 
 
 def get_resource_metadata_path(
-    *, config: TusConfig, match_info: web.UrlMappingMatchInfo, uid: str
+    *, config: Config, match_info: web.UrlMappingMatchInfo, uid: str
 ) -> Path:
     return config.resolve_metadata_path(match_info) / f"{uid}.json"
+
+
+def get_resource_url(upload_url: str) -> str:
+    return "/".join((upload_url.rstrip("/"), r"{resource_uid}"))
+
+
+def get_upload_url(resource_url: str) -> str:
+    return resource_url.rsplit("/", 1)[0]
+
+
+def set_config(app: web.Application, upload_url: str, config: Config) -> None:
+    if upload_url in app[APP_TUS_CONFIG_KEY]:
+        raise ValueError(
+            f"Upload URL {upload_url!r} already registered for the application. "
+            "Please pass other `upload_url` keyword argument in `setup_tus` function."
+        )
+    app[APP_TUS_CONFIG_KEY][upload_url] = config

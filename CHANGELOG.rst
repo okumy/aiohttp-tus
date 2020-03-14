@@ -1,3 +1,8 @@
+1.0.0b0 (In Development)
+========================
+
+- Allow to setup tus upload URLs multiple times for one ``aiohttp.web`` application
+
 1.0.0a1 (2020-03-12)
 ====================
 

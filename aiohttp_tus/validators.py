@@ -4,11 +4,11 @@ from typing import Optional
 from aiohttp import web
 
 from .annotations import MappingStrBytes
-from .data import TusConfig
+from .data import Config
 
 
 def check_file_name(
-    valid_metadata: MappingStrBytes, *, config: TusConfig
+    valid_metadata: MappingStrBytes, *, config: Config
 ) -> Optional[str]:
     path = Path(valid_metadata["filename"].decode())
     if any(config.upload_path.glob(f"{path.stem}.*")):

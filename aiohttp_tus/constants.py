@@ -14,9 +14,6 @@ HEADER_UPLOAD_LENGTH = "Upload-Length"
 HEADER_UPLOAD_METADATA = "Upload-Metadata"
 HEADER_UPLOAD_OFFSET = "Upload-Offset"
 
-ROUTE_UPLOAD = "aiohttp_tus_upload"
-ROUTE_RESOURCE = "aiohttp_tus_resource"
-
 TUS_API_VERSION = "1.0.0"
 TUS_API_VERSION_SUPPORTED = "1.0.0"
 TUS_API_EXTENSIONS = ("creation", "termination", "file-check")

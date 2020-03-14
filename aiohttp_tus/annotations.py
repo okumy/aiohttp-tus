@@ -9,5 +9,8 @@ DictStrAny = Dict[str, Any]
 DictStrBytes = Dict[str, bytes]
 DictStrStr = Dict[str, str]
 
+JsonDumps = Callable[[Any], str]
+JsonLoads = Callable[[str], Any]
+
 MappingStrBytes = Mapping[str, bytes]
 MappingStrStr = Mapping[str, str]

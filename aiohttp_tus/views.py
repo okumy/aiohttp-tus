@@ -5,7 +5,7 @@ from aiohttp import web
 
 from . import constants
 from .annotations import DictStrStr
-from .data import Resource, TusConfig
+from .data import get_config, Resource
 from .utils import get_resource_or_404, get_resource_or_410, parse_upload_metadata
 from .validators import check_file_name, validate_upload_metadata
 
@@ -19,7 +19,7 @@ async def delete_resource(request: web.Request) -> web.Response:
     resource = get_resource_or_404(request)
 
     # Remove resource file and its metadata
-    config: TusConfig = request.config_dict[constants.APP_TUS_CONFIG_KEY]
+    config = get_config(request)
     match_info = request.match_info
     resource.delete(config=config, match_info=match_info)
     resource.delete_metadata(config=config, match_info=match_info)
@@ -53,7 +53,7 @@ async def start_upload(request: web.Request) -> web.Response:
             text="Received file upload for unsupported file transfer protocol"
         )
 
-    config: TusConfig = request.config_dict[constants.APP_TUS_CONFIG_KEY]
+    config = get_config(request)
     headers = constants.BASE_HEADERS.copy()
 
     # Ensure upload metadata header is valid one
@@ -99,7 +99,7 @@ async def start_upload(request: web.Request) -> web.Response:
     # Specify resource headers for tus client
     headers[constants.HEADER_LOCATION] = str(
         request.url.join(
-            request.app.router[constants.ROUTE_RESOURCE].url_for(
+            request.app.router[config.resource_tus_resource_name].url_for(
                 **request.match_info, resource_uid=resource.uid
             )
         )
@@ -112,9 +112,7 @@ async def start_upload(request: web.Request) -> web.Response:
 async def upload_details(request: web.Request) -> web.Response:
     """Check whether requested filename already started to upload or not."""
     valid_metadata = validate_upload_metadata(parse_upload_metadata(request.headers))
-    file_name = check_file_name(
-        valid_metadata, config=request.config_dict[constants.APP_TUS_CONFIG_KEY]
-    )
+    file_name = check_file_name(valid_metadata, config=get_config(request))
 
     headers: DictStrStr = {}
     if file_name is not None:
@@ -155,7 +153,7 @@ async def upload_resource(request: web.Request) -> web.Response:
         raise web.HTTPConflict(headers=constants.BASE_HEADERS)
 
     # Save current chunk to the resource
-    config: TusConfig = request.config_dict[constants.APP_TUS_CONFIG_KEY]
+    config = get_config(request)
     match_info = request.match_info
     resource.save(config=config, match_info=match_info, chunk=await request.read())
 

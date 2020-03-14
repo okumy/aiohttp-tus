@@ -1,11 +1,12 @@
+import json
 from pathlib import Path
 
 from aiohttp import web
 
 from . import views
-from .annotations import Decorator, Handler
-from .constants import APP_TUS_CONFIG_KEY, ROUTE_RESOURCE, ROUTE_UPLOAD
-from .data import TusConfig
+from .annotations import Decorator, Handler, JsonDumps, JsonLoads
+from .constants import APP_TUS_CONFIG_KEY
+from .data import Config, get_resource_url, set_config
 
 
 def setup_tus(
@@ -15,6 +16,8 @@ def setup_tus(
     upload_url: str = "/uploads",
     allow_overwrite_files: bool = False,
     decorator: Decorator = None,
+    json_dumps: JsonDumps = json.dumps,
+    json_loads: JsonLoads = json.loads,
 ) -> web.Application:
     """Setup tus protocol server implementation for aiohttp.web application."""
 
@@ -23,22 +26,33 @@ def setup_tus(
             return handler
         return decorator(handler)
 
+    # Ensure support of multiple tus upload URLs for one application
+    app.setdefault(APP_TUS_CONFIG_KEY, {})
+
     # Store tus config in application
-    app[APP_TUS_CONFIG_KEY] = TusConfig(
-        upload_path=upload_path, allow_overwrite_files=allow_overwrite_files,
+    config = Config(
+        upload_path=upload_path,
+        upload_url=upload_url,
+        allow_overwrite_files=allow_overwrite_files,
+        json_dumps=json_dumps,
+        json_loads=json_loads,
     )
+    set_config(app, upload_url, config)
 
     # Views for upload management
-    app.router.add_options(upload_url, views.upload_options, name=ROUTE_UPLOAD)
-    app.router.add_get(upload_url, decorate(views.upload_details))
-    app.router.add_post(upload_url, decorate(views.start_upload))
+    upload_resource = app.router.add_resource(
+        upload_url, name=config.resource_tus_upload_name
+    )
+    upload_resource.add_route("OPTIONS", views.upload_options)
+    upload_resource.add_route("GET", decorate(views.upload_details))
+    upload_resource.add_route("POST", decorate(views.start_upload))
 
     # Views for resource management
-    resource_url = "/".join((upload_url.rstrip("/"), r"{resource_uid}"))
-    app.router.add_head(
-        resource_url, decorate(views.resource_details), name=ROUTE_RESOURCE
+    resource_resource = app.router.add_resource(
+        get_resource_url(upload_url), name=config.resource_tus_resource_name
     )
-    app.router.add_delete(resource_url, decorate(views.delete_resource))
-    app.router.add_patch(resource_url, decorate(views.upload_resource))
+    resource_resource.add_route("HEAD", decorate(views.resource_details))
+    resource_resource.add_route("DELETE", decorate(views.delete_resource))
+    resource_resource.add_route("PATCH", decorate(views.upload_resource))
 
     return app
