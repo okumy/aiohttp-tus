@@ -6,7 +6,12 @@ from aiohttp import web
 from . import constants
 from .annotations import DictStrStr
 from .data import get_config, Resource
-from .utils import get_resource_or_404, get_resource_or_410, parse_upload_metadata
+from .utils import (
+    get_resource_or_404,
+    get_resource_or_410,
+    on_upload_done,
+    parse_upload_metadata,
+)
 from .validators import check_file_name, validate_upload_metadata
 
 
@@ -161,7 +166,8 @@ async def upload_resource(request: web.Request) -> web.Response:
     chunk_size = int(request.headers.get(constants.HEADER_CONTENT_LENGTH) or 0)
     next_offset = resource.offset + chunk_size
     if next_offset == resource.file_size:
-        resource.complete(config=config, match_info=match_info)
+        file_path = resource.complete(config=config, match_info=match_info)
+        await on_upload_done(config=config, resource=resource, file_path=file_path)
     # But if it is not - store new metadata
     else:
         next_resource = attr.evolve(resource, offset=next_offset)

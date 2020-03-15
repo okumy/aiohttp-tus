@@ -2,6 +2,7 @@
 ========================
 
 - Allow to setup tus upload URLs multiple times for one ``aiohttp.web`` application
+- Allow to call callback after upload is done
 - Provide many unit tests for tus views
 
 1.0.0a1 (2020-03-12)

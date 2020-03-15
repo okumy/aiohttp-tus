@@ -3,7 +3,7 @@ import json
 import shutil
 import uuid
 from pathlib import Path
-from typing import Tuple
+from typing import Awaitable, Callable, Optional, Tuple
 
 import attr
 from aiohttp import web
@@ -18,6 +18,8 @@ class Config:
     upload_url: str
 
     allow_overwrite_files: bool = False
+    on_upload_done: Optional["ResourceCallback"] = None
+
     mkdir_mode: int = 0o755
 
     json_dumps: JsonDumps = json.dumps
@@ -126,6 +128,9 @@ class Resource:
         path.write_text(config.json_dumps(data))
 
         return (path, data)
+
+
+ResourceCallback = Callable[[Resource, Path], Awaitable[None]]
 
 
 def delete_path(path: Path) -> bool:

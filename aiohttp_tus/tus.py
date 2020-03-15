@@ -6,7 +6,7 @@ from aiohttp import web
 from . import views
 from .annotations import Decorator, Handler, JsonDumps, JsonLoads
 from .constants import APP_TUS_CONFIG_KEY
-from .data import Config, get_resource_url, set_config
+from .data import Config, get_resource_url, ResourceCallback, set_config
 
 
 def setup_tus(
@@ -16,6 +16,7 @@ def setup_tus(
     upload_url: str = "/uploads",
     allow_overwrite_files: bool = False,
     decorator: Decorator = None,
+    on_upload_done: ResourceCallback = None,
     json_dumps: JsonDumps = json.dumps,
     json_loads: JsonLoads = json.loads,
 ) -> web.Application:
@@ -34,6 +35,7 @@ def setup_tus(
         upload_path=upload_path,
         upload_url=upload_url,
         allow_overwrite_files=allow_overwrite_files,
+        on_upload_done=on_upload_done,
         json_dumps=json_dumps,
         json_loads=json_loads,
     )

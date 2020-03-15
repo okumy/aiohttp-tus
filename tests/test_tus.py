@@ -15,7 +15,7 @@ from aiohttp.test_utils import TestClient
 from aiohttp_tus import setup_tus
 from aiohttp_tus.annotations import Decorator, Handler
 from aiohttp_tus.constants import APP_TUS_CONFIG_KEY
-from aiohttp_tus.data import Config
+from aiohttp_tus.data import Config, ResourceCallback
 from tests.common import (
     get_upload_url,
     TEST_CHUNK_SIZE,
@@ -38,6 +38,7 @@ def aiohttp_test_client(aiohttp_client):
         upload_url: str,
         upload_suffix: str = None,
         allow_overwrite_files: bool = False,
+        on_upload_done: ResourceCallback = None,
         decorator: Decorator = None,
     ) -> TestClient:
         with tempfile.TemporaryDirectory(prefix="aiohttp_tus") as temp_path:
@@ -47,6 +48,7 @@ def aiohttp_test_client(aiohttp_client):
                 upload_path=base_path / upload_suffix if upload_suffix else base_path,
                 upload_url=upload_url,
                 allow_overwrite_files=allow_overwrite_files,
+                on_upload_done=on_upload_done,
                 decorator=decorator,
             )
             yield await aiohttp_client(app)
@@ -95,6 +97,24 @@ async def test_decorated_upload_403(aiohttp_test_client, loop):
                 await loop.run_in_executor(
                     None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
                 )
+
+
+async def test_on_upload_callback(aiohttp_test_client, loop):
+    data = {}
+    upload = partial(tus.upload, file_name=TEST_FILE_NAME)
+
+    async def on_upload_done(resource, file_path):
+        data[resource.file_name] = file_path
+
+    async with aiohttp_test_client(
+        upload_url=TEST_UPLOAD_URL, on_upload_done=on_upload_done
+    ) as client:
+        with open(TEST_FILE_PATH, "rb") as handler:
+            await loop.run_in_executor(
+                None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
+            )
+
+    assert TEST_FILE_NAME in data
 
 
 async def test_overwrite_file_allowed(aiohttp_test_client, loop):

@@ -1,11 +1,12 @@
 import base64
 import logging
+from pathlib import Path
 
 from aiohttp import web
 from multidict import CIMultiDict
 
 from .annotations import DictStrBytes, MappingStrBytes
-from .data import get_config, get_resource_path, Resource
+from .data import Config, get_config, get_resource_path, Resource
 
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,15 @@ def get_resource_or_410(request: web.Request) -> Resource:
         )
         raise web.HTTPGone(text="")
     return resource
+
+
+async def on_upload_done(
+    *, config: Config, resource: Resource, file_path: Path
+) -> None:
+    if not config.on_upload_done:
+        return
+
+    await config.on_upload_done(resource, file_path)
 
 
 def parse_upload_metadata(metadata_header: str) -> MappingStrBytes:
