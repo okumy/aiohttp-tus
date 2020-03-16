@@ -1,5 +1,14 @@
-1.0.0b0 (In Development)
+=========
+ChangeLog
+=========
+
+1.0.0b1 (In Development)
 ========================
+
+- Add docs
+
+1.0.0b0 (2020-03-15)
+====================
 
 - Allow to setup tus upload URLs multiple times for one ``aiohttp.web`` application
 - Allow to call callback after upload is done

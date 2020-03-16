@@ -6,6 +6,22 @@ aiohttp-tus
    :target: https://github.com/pylotcode/aiohttp-tus/actions?query=workflow%3A%22ci%22
    :alt: CI Workflow
 
+.. image:: https://img.shields.io/pypi/v/aiohttp-tus.svg
+    :target: https://pypi.org/project/aiohttp-tus/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/pyversions/aiohttp-tus.svg
+    :target: https://pypi.org/project/aiohttp-tus/
+    :alt: Python versions
+
+.. image:: https://img.shields.io/pypi/l/aiohttp-tus.svg
+    :target: https://github.com/pylotcode/aiohttp-tus/blob/master/LICENSE
+    :alt: BSD License
+
+.. image:: https://readthedocs.org/projects/aiohttp-tus/badge/?version=latest
+    :target: http://aiohttp-tus.readthedocs.org/en/latest/
+    :alt: Documentation
+
 `tus.io <https://tus.io>`_ server implementation for
 `aiohttp.web <https://docs.aiohttp.org/en/stable/web.html>`_ applications.
 
