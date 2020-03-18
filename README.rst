@@ -31,6 +31,8 @@ For uploading large files, please consider using
 - Works on Python 3.6+
 - Works with aiohttp 3.5+
 - BSD licensed
+- Latest documentation `on Read The Docs
+  <https://aiohttp-tus.readthedocs.io/>`_
 - Source, issues, and pull requests `on GitHub
   <https://github.com/pylotcode/aiohttp-tus>`_
 
