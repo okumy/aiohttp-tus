@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.0.0b2 (In Development)
+========================
+
+- Ensure trailing slash upload URLs working as well
+
 1.0.0b1 (2020-03-18)
 ====================
 

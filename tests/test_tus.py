@@ -152,11 +152,19 @@ async def test_overwrite_file_disallowed(aiohttp_test_client, loop):
     "upload_url, canonical_upload_url, upload_suffix, tus_upload_url, match_info",
     (
         (TEST_UPLOAD_URL, TEST_UPLOAD_URL, None, TEST_UPLOAD_URL, {}),
+        (f"{TEST_UPLOAD_URL}/", f"{TEST_UPLOAD_URL}/", None, f"{TEST_UPLOAD_URL}/", {}),
         (
             r"/user/{username}/uploads",
             r"/user/{username}/uploads",
             None,
             "/user/playpauseanddtop/uploads",
+            {},
+        ),
+        (
+            r"/user/{username}/uploads/",
+            r"/user/{username}/uploads/",
+            None,
+            "/user/playpauseanddtop/uploads/",
             {},
         ),
         (
@@ -167,10 +175,24 @@ async def test_overwrite_file_disallowed(aiohttp_test_client, loop):
             {},
         ),
         (
+            r"/user/{username:([a-zA-Z0-9_-])+}/uploads/",
+            r"/user/{username}/uploads/",
+            None,
+            "/user/playpauseanddtop/uploads/",
+            {},
+        ),
+        (
             r"/user/{username}/uploads",
             r"/user/{username}/uploads",
             r"{username}",
             "/user/playpauseandstop/uploads",
+            {"username": "playpauseandstop"},
+        ),
+        (
+            r"/user/{username}/uploads/",
+            r"/user/{username}/uploads/",
+            r"{username}",
+            "/user/playpauseandstop/uploads/",
             {"username": "playpauseandstop"},
         ),
     ),

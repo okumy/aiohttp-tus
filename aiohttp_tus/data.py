@@ -2,6 +2,7 @@ import base64
 import json
 import shutil
 import uuid
+from contextlib import suppress
 from pathlib import Path
 from typing import Awaitable, Callable, Optional, Tuple
 
@@ -164,7 +165,9 @@ def get_config(request: web.Request) -> Config:
         config_key = get_upload_url(config_key)
 
     try:
-        return container[config_key]  # type: ignore
+        with suppress(KeyError):
+            return container[config_key]  # type: ignore
+        return container[f"{config_key}/"]  # type: ignore
     except KeyError:
         raise KeyError("Unable to find aiohttp_tus config for specified URL")
 

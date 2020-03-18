@@ -15,7 +15,7 @@ show_missing = true
 
 [tool.poetry]
 name = "aiohttp-tus"
-version = "1.0.0b1"
+version = "1.0.0b2"
 description = "tus.io protocol implementation for aiohttp.web applications"
 authors = ["Igor Davydenko <iam@igordavydenko.com>"]
 license = "BSD-3-Clause"
