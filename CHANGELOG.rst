@@ -2,8 +2,8 @@
 ChangeLog
 =========
 
-1.0.0b1 (In Development)
-========================
+1.0.0b1 (2020-03-18)
+====================
 
 - Add brief documentation
 - Use canonical upload URL for tus config mapping
