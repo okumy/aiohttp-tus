@@ -167,7 +167,9 @@ async def upload_resource(request: web.Request) -> web.Response:
     next_offset = resource.offset + chunk_size
     if next_offset == resource.file_size:
         file_path = resource.complete(config=config, match_info=match_info)
-        await on_upload_done(config=config, resource=resource, file_path=file_path)
+        await on_upload_done(
+            request=request, config=config, resource=resource, file_path=file_path
+        )
     # But if it is not - store new metadata
     else:
         next_resource = attr.evolve(resource, offset=next_offset)

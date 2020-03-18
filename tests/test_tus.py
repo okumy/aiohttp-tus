@@ -103,7 +103,7 @@ async def test_on_upload_callback(aiohttp_test_client, loop):
     data = {}
     upload = partial(tus.upload, file_name=TEST_FILE_NAME)
 
-    async def on_upload_done(resource, file_path):
+    async def on_upload_done(request, resource, file_path):
         data[resource.file_name] = file_path
 
     async with aiohttp_test_client(
@@ -149,11 +149,25 @@ async def test_overwrite_file_disallowed(aiohttp_test_client, loop):
 
 
 @pytest.mark.parametrize(
-    "upload_url, upload_suffix, tus_upload_url, match_info",
+    "upload_url, canonical_upload_url, upload_suffix, tus_upload_url, match_info",
     (
-        (TEST_UPLOAD_URL, None, TEST_UPLOAD_URL, {}),
-        (r"/user/{username}/uploads", None, "/user/playpauseanddtop/uploads", {}),
+        (TEST_UPLOAD_URL, TEST_UPLOAD_URL, None, TEST_UPLOAD_URL, {}),
         (
+            r"/user/{username}/uploads",
+            r"/user/{username}/uploads",
+            None,
+            "/user/playpauseanddtop/uploads",
+            {},
+        ),
+        (
+            r"/user/{username:([a-zA-Z0-9_-])+}/uploads",
+            r"/user/{username}/uploads",
+            None,
+            "/user/playpauseanddtop/uploads",
+            {},
+        ),
+        (
+            r"/user/{username}/uploads",
             r"/user/{username}/uploads",
             r"{username}",
             "/user/playpauseandstop/uploads",
@@ -162,7 +176,13 @@ async def test_overwrite_file_disallowed(aiohttp_test_client, loop):
     ),
 )
 async def test_upload(
-    aiohttp_test_client, loop, upload_url, upload_suffix, tus_upload_url, match_info,
+    aiohttp_test_client,
+    loop,
+    upload_url,
+    canonical_upload_url,
+    upload_suffix,
+    tus_upload_url,
+    match_info,
 ):
     upload = partial(tus.upload, file_name=TEST_FILE_NAME)
 
@@ -174,7 +194,7 @@ async def test_upload(
                 None, upload, handler, get_upload_url(client, tus_upload_url)
             )
 
-        config: Config = client.app[APP_TUS_CONFIG_KEY][upload_url]
+        config: Config = client.app[APP_TUS_CONFIG_KEY][canonical_upload_url]
         expected_upload_path = config.resolve_upload_path(match_info) / TEST_FILE_NAME
         assert expected_upload_path.exists()
         assert expected_upload_path.read_bytes() == TEST_FILE_PATH.read_bytes()

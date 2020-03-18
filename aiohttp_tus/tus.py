@@ -20,7 +20,47 @@ def setup_tus(
     json_dumps: JsonDumps = json.dumps,
     json_loads: JsonLoads = json.loads,
 ) -> web.Application:
-    """Setup tus protocol server implementation for aiohttp.web application."""
+    """Setup tus protocol server implementation for aiohttp.web application.
+
+    It is a cornerstone of ``aiohttp-tus`` library and in most cases only thing
+    developers need to know for setting up tus.io server for aiohttp.web application.
+
+    :param app: :class:`aiohttp.web.Application` instance
+    :param upload_path:
+        :class:`pathlib.Path` instance to point the directory where to store uploaded
+        files. Please, esnure that given directory is exists before application start
+        and is writeable for current user.
+
+        It is possible to prepend any ``match_info`` param from named URL.
+    :param upload_url:
+        tus.io upload URL. Can be plain as ``/uploads`` or named as
+        ``/users/{username}/uploads``. By default: ``"/uploads"``
+    :param allow_overwrite_files:
+        When enabled allow to overwrite already uploaded files. This may harm
+        consistency of stored data, cause please use this param with caution. By
+        default: ``False``
+    :param decorator:
+        In case of guarding upload views it might be useful to decorate them with
+        given decorator function. By default: ``None`` (which means **ANY** client will
+        able to upload files)
+    :param on_upload_done:
+        Coroutine to call after upload is done. Coroutine will receive three arguments:
+        ``request``, ``resource`` & ``file_path``. Request is current
+        :class:`aiohttp.web.Request` instance. Resource will contain all data about
+        uploaded resource such as file name, file size
+        (:class:`aiohttp_tus.data.Resource` instance). While file path will contain
+        :class:`pathlib.Path` instance of uploaded file.
+    :param json_dumps:
+        To store resource metadata between chunk uploads ``aiohttp-tus`` using JSON
+        files, stored into ``upload_path / ".metadata"`` directory.
+
+        To dump the data builtin Python function used: :func:`json.dumps`, but you
+        might customize things if interested in using ``ujson``, ``orjson``,
+        ``rapidjson`` or other implementation.
+    :param json_loads:
+        Similarly to ``json_dumps``, but for loading data from JSON metadata files.
+        By default: :func:`json.loads`
+    """
 
     def decorate(handler: Handler) -> Handler:
         if decorator is None:
@@ -29,6 +69,10 @@ def setup_tus(
 
     # Ensure support of multiple tus upload URLs for one application
     app.setdefault(APP_TUS_CONFIG_KEY, {})
+
+    # Need to find out canonical dynamic resource URL if any and use it for storing
+    # tus config into the app
+    canonical_upload_url = web.DynamicResource(upload_url).canonical
 
     # Store tus config in application
     config = Config(
@@ -39,7 +83,7 @@ def setup_tus(
         json_dumps=json_dumps,
         json_loads=json_loads,
     )
-    set_config(app, upload_url, config)
+    set_config(app, canonical_upload_url, config)
 
     # Views for upload management
     upload_resource = app.router.add_resource(

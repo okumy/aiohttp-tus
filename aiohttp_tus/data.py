@@ -57,6 +57,19 @@ class Config:
 
 @attr.dataclass(frozen=True, slots=True)
 class Resource:
+    """Dataclass to store resource metadata.
+
+    Given dataclass used internally in between resource chunk uploads and is passed
+    to ``on_upload_done`` callback if one is defined at :func:`aiohttp_tus.setup_tus`
+    call.
+
+    :param uid: Resource UUID. By default: ``str(uuid.uuid4())``
+    :param file_name: Resource file name.
+    :param file_size: Resource file size.
+    :param offset: Current resource offset.
+    :param metadata_header: Metadata header sent on initiating resource upload.
+    """
+
     file_name: str
     file_size: int
     offset: int
@@ -130,7 +143,7 @@ class Resource:
         return (path, data)
 
 
-ResourceCallback = Callable[[Resource, Path], Awaitable[None]]
+ResourceCallback = Callable[[web.Request, Resource, Path], Awaitable[None]]
 
 
 def delete_path(path: Path) -> bool:

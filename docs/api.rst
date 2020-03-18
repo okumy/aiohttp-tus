@@ -2,4 +2,5 @@
 API Reference
 =============
 
-TODO
+.. autofunction:: aiohttp_tus.setup_tus
+.. autoclass:: aiohttp_tus.data.Resource

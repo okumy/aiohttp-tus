@@ -5,7 +5,8 @@ ChangeLog
 1.0.0b1 (In Development)
 ========================
 
-- Add docs
+- Add brief documentation
+- Use canonical upload URL for tus config mapping
 
 1.0.0b0 (2020-03-15)
 ====================

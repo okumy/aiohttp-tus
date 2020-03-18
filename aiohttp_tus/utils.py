@@ -46,12 +46,12 @@ def get_resource_or_410(request: web.Request) -> Resource:
 
 
 async def on_upload_done(
-    *, config: Config, resource: Resource, file_path: Path
+    *, request: web.Request, config: Config, resource: Resource, file_path: Path
 ) -> None:
     if not config.on_upload_done:
         return
 
-    await config.on_upload_done(resource, file_path)
+    await config.on_upload_done(request, resource, file_path)
 
 
 def parse_upload_metadata(metadata_header: str) -> MappingStrBytes:
