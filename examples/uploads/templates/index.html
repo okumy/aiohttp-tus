@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>aiohttp-tus &amp; uppy.io example</title>
+    <meta charset="utf-8" />
+
+    <!-- Load Uppy CSS bundle. It is advisable to install Uppy
+      from npm/yarn instead, and pick and choose the plugins/styles you need.
+      But for experimenting, you can use Transloadit’s CDN, Edgly: -->
+    <link rel="stylesheet" href="https://transloadit.edgly.net/releases/uppy/v1.10.1/uppy.min.css">
+  </head>
+
+  <body>
+    <h1>
+      <a href="https://aiohttp-tus.readthedocs.io">aiohttp-tus</a> &amp;
+      <a href="https://uppy.io">uppy.io</a> example
+    </h1>
+
+    <ul className="margin-bottom: 0.5rem">
+      <li>aiohttp-tus version: <code>1.0.0rc0</code></li>
+      <li>Uppy.io version: <code>1.10.1</code></li>
+    </ul>
+
+    <div class="UppyDragDrop"></div>
+    <div class="UppyDragDrop-Progress" style="margin-top: 0.5rem"></div>
+
+    <div class="uploaded-files">
+      <h4>Uploaded files:</h4>
+      <ol></ol>
+    </div>
+
+    <div class="help-text" style="margin-top: 0.5rem">
+      <i>Allowed to upload up to <b>10 files</b> per session.</i>
+    </div>
+
+    <!-- Load Uppy JS bundle. -->
+    <script src="https://transloadit.edgly.net/releases/uppy/v1.10.1/uppy.min.js"></script>
+    <script>
+      var uppy = Uppy.Core({
+        debug: true,
+        autoProceed: true,
+        restrictions: {
+          minNumberOfFiles: 1,
+          maxNumberOfFiles: 10
+        }
+      });
+      uppy.use(Uppy.DragDrop, {
+        target: '.UppyDragDrop'
+      });
+      uppy.use(Uppy.StatusBar, {
+        target: '.UppyDragDrop-Progress',
+        hideUploadButton: true,
+        hideAfterFinish: false
+      });
+      uppy.use(Uppy.Tus, {
+        chunkSize: {{ chunk_size }},
+        endpoint: '/uploads',
+        limit: 5
+      });
+      uppy.on('upload-success', function (file, response) {
+        var url = response.uploadURL
+        var fileName = file.name
+
+        document.querySelector('.uploaded-files ol').innerHTML +=
+          '<li>' + fileName + '</li>'
+      });
+
+      console.log('--> Uppy pre-built version with Tus & DragDrop has loaded');
+    </script>
+  </body>
+</html>

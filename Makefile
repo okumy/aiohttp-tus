@@ -23,8 +23,8 @@ PYTHON ?= $(POETRY) run python
 SPHINXBUILD ?= $(POETRY) run sphinx-build
 TOX ?= tox
 
-# Test constants
-TEST_APP_PORT = 8300
+# Example constants
+AIOHTTP_PORT = 8300
 
 all: install
 
@@ -37,6 +37,14 @@ distclean: clean
 docs: .install
 	$(PYTHON) -m pip install -r docs/requirements.txt
 	$(MAKE) -C docs/ SPHINXBUILD="$(SPHINXBUILD)" html
+
+example: .install
+ifeq ($(EXAMPLE),)
+	# EXAMPLE env var is required, e.g. `make EXAMPLE=uploads example`
+	@exit 1
+else
+	$(PYTHON) -m aiohttp.web --port $(AIOHTTP_PORT) examples.$(EXAMPLE):create_app
+endif
 
 install: .install
 .install: pyproject.toml poetry.lock
@@ -56,9 +64,6 @@ open-docs: docs
 	open $(DOCS_DIR)/_build/html/index.html
 
 test: install clean lint test-only
-
-test-app:
-	$(PYTHON) -m aiohttp.web --port $(TEST_APP_PORT) tests.app:create_app
 
 test-only:
 	rm -rf tests/test-uploads/

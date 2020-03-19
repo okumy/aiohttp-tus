@@ -15,7 +15,7 @@ show_missing = true
 
 [tool.poetry]
 name = "aiohttp-tus"
-version = "1.0.0b2"
+version = "1.0.0rc0"
 description = "tus.io protocol implementation for aiohttp.web applications"
 authors = ["Igor Davydenko <iam@igordavydenko.com>"]
 license = "BSD-3-Clause"
@@ -40,8 +40,10 @@ python = "^3.6"
 aiohttp = "^3.6.2"
 
 [tool.poetry.dev-dependencies]
+aiohttp-jinja2 = "^1.2.0"
 async_generator = {version = "^1.10", python = "~3.6"}
 coverage = {extras = ["toml"], version = "^5.0.3"}
+humanfriendly = "^8.1"
 pytest = "^5.3.5"
 pytest-aiohttp = "^0.3.0"
 pytest-asyncio = "^0.10.0"
