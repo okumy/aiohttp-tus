@@ -56,3 +56,11 @@ directory.
         upload_url="/uploads",
         upload_path=Path(__file__).parent.parent / "uploads",
     )
+
+Chunk Size
+==========
+
+Please, make sure to configure ``client_max_size`` for ``aiohttp.web`` Application and
+supply proper ``chunkSize`` for Uppy.io or other tus.io client.
+
+`Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#understanding-tus-io-chunk-size>`_

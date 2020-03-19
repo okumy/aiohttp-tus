@@ -21,6 +21,7 @@ authors = ["Igor Davydenko <iam@igordavydenko.com>"]
 license = "BSD-3-Clause"
 readme = "README.rst"
 repository = "https://github.com/pylotcode/aiohttp-tus"
+documentation = "https://aiohttp-tus.readthedocs.io/"
 keywords = ["aiohttp", "tus", "tus.io"]
 classifiers = [
     "Development Status :: 4 - Beta",
