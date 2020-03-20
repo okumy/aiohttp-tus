@@ -72,7 +72,7 @@ supply proper ``chunkSize`` for Uppy.io or other tus.io client.
 Examples
 ========
 
-`examples <https://github.com/pylotcode/aiohttp-tus/tree/master/examples>`_ directory
-contains several examples, which illustrate on how to use ``aiohttp-tus`` with some
-tus.io clients, such as `tus.py <https://pypi.org/project/tus.py/>` and
-`Uppy.io <https://uppy.io>`_
+`examples/ <https://github.com/pylotcode/aiohttp-tus/tree/master/examples>`_ directory
+contains several examples, which illustrate how to use ``aiohttp-tus`` with some tus.io
+clients, such as `tus.py <https://pypi.org/project/tus.py/>`_ and
+`Uppy.io <https://uppy.io>`_.
