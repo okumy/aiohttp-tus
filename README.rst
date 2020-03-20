@@ -68,3 +68,11 @@ Please, make sure to configure ``client_max_size`` for ``aiohttp.web`` Applicati
 supply proper ``chunkSize`` for Uppy.io or other tus.io client.
 
 `Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#understanding-tus-io-chunk-size>`_
+
+Examples
+========
+
+`examples <https://github.com/pylotcode/aiohttp-tus/tree/master/examples>`_ directory
+contains several examples, which illustrate on how to use ``aiohttp-tus`` with some
+tus.io clients, such as `tus.py <https://pypi.org/project/tus.py/>` and
+`Uppy.io <https://uppy.io>`_
