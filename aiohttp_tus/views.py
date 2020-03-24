@@ -43,6 +43,7 @@ async def resource_details(request: web.Request) -> web.Response:
             **constants.BASE_HEADERS,
             constants.HEADER_CACHE_CONTROL: "no-store",
             constants.HEADER_UPLOAD_OFFSET: str(resource.offset),
+            constants.HEADER_UPLOAD_LENGTH: str(resource.file_size),
         },
     )
 
