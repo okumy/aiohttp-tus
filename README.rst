@@ -3,12 +3,12 @@ aiohttp-tus
 ===========
 
 .. image:: https://github.com/pylotcode/aiohttp-tus/workflows/ci/badge.svg
-   :target: https://github.com/pylotcode/aiohttp-tus/actions?query=workflow%3A%22ci%22
-   :alt: CI Workflow
+    :target: https://github.com/pylotcode/aiohttp-tus/actions?query=workflow%3A%22ci%22
+    :alt: CI Workflow
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-   :target: https://github.com/pre-commit/pre-commit
-   :alt: pre-commit
+    :target: https://github.com/pre-commit/pre-commit
+    :alt: pre-commit
 
 .. image:: https://img.shields.io/pypi/v/aiohttp-tus.svg
     :target: https://pypi.org/project/aiohttp-tus/

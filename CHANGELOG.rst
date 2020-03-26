@@ -7,6 +7,9 @@ ChangeLog
 
 - Add example to ensure that upload via `Uppy <https://uppy.io>`_ JavaScript library
   works as expected
+- Fix resuming uploads by passing missed ``Upload-Length`` header:
+  `#5 <https://github.com/pylotcode/aiohttp-tus/pull/5>`_
+- Add documentation about `CORS Headers <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#cors-headers>`_
 
 1.0.0b2 (2020-03-18)
 ====================

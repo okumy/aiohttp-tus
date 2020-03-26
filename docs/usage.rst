@@ -17,7 +17,7 @@ To allow upload files to ``../uploads`` directory for all clients via ``/uploads
 
     app = setup_tus(
         web.Application(),
-        upload_path=Path(__file__).parent.parent / "uploads"
+        upload_path=Path(__file__).parent.parent / "uploads",
     )
 
 Understanding tus.io Chunk Size
@@ -75,6 +75,44 @@ uppy.io Configuration
     chunk size **at least 1 byte smaller** than ``client_max_size``. If you'll provide
     chunk size equals to client max size upload will not work properly.
 
+CORS Headers
+============
+
+At a moment (`Mar 26 2020`), ``aiohttp-tus`` supports setting up CORS Headers for
+``aiohttp.web`` application only via `cors_middleware <https://https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#cors-middleware>`_
+from ``aiohttp-middlewares`` package.
+
+As ``aiohttp-tus`` registers `OPTIONS` handlers it doesn't work with
+`aiohttp-cors <https://github.com/aio-libs/aiohttp-cors>`_ library cause of known issue
+`aio-libs/aiohttp-cors#241 <https://github.com/aio-libs/aiohttp-cors/issues/241>`_.
+(`Full discussion <https://github.com/pylotcode/aiohttp-tus/issues/4>`_)
+
+To enable CORS Headers for your ``aiohttp.web`` application, which is using
+``aiohttp-tus``, you need to,
+
+1. Install `aiohttp-middlewares <https://aiohttp-middlewares.readthedocs.io>`_
+2. In your `app.py`,
+
+   .. code-block:: python
+
+       from pathlib import Path
+
+       from aiohttp import web
+       from aiohttp_middlewares import cors_middleware
+       from aiohttp_tus import setup_tus
+
+
+       # Allow CORS Headers for requests from http://localhost:3000
+       app = web.Application(
+           middlewares=[
+               cors_middleware(origins=["http://localhost:3000"])
+           ]
+       )
+       setup_tus(
+           app,
+           upload_path=Pathlib(__file__).parent.parent / "uploads",
+       )
+
 User Uploads
 ============
 
@@ -105,8 +143,8 @@ via ``/users/{username}/uploads`` URL,
         decorator=upload_user_required,
     )
 
-Callback
-========
+On Upload Done Callback
+=======================
 
 There is a possibility to run any coroutine after upload is done. Example below,
 illustrates how to achieve that,
@@ -117,9 +155,7 @@ illustrates how to achieve that,
 
 
     async def notify_on_upload(
-        request: web.Request,
-        resource: Resource,
-        file_path: Path,
+        request: web.Request, resource: Resource, file_path: Path,
     ) -> None:
         redis = request.config_dict["redis"]
         await redis.rpush("uploaded_files", resource.file_name)
@@ -144,10 +180,7 @@ achieve anonymous & authenticated uploads in same time for one
     base_upload_path = Path(__file__).parent.parent / "uploads"
 
     # Anonymous users uploads
-    setup_tus(
-        app,
-        upload_path=base_upload_path / "anonymous"
-    )
+    setup_tus(app, upload_path=base_upload_path / "anonymous")
 
     # Authenticated users uploads
     setup_tus(

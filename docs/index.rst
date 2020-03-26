@@ -27,4 +27,5 @@ Contents
 
    usage
    api
+   authors
    changelog
