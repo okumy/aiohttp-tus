@@ -2,8 +2,8 @@
 ChangeLog
 =========
 
-1.0.0rc0 (In Development)
-=========================
+1.0.0rc0 (2020-03-26)
+=====================
 
 - Add example to ensure that upload via `Uppy <https://uppy.io>`_ JavaScript library
   works as expected
