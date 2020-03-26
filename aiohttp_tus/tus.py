@@ -14,6 +14,7 @@ def setup_tus(
     *,
     upload_path: Path,
     upload_url: str = "/uploads",
+    upload_resource_name: str = None,
     allow_overwrite_files: bool = False,
     decorator: Decorator = None,
     on_upload_done: ResourceCallback = None,
@@ -35,6 +36,10 @@ def setup_tus(
     :param upload_url:
         tus.io upload URL. Can be plain as ``/uploads`` or named as
         ``/users/{username}/uploads``. By default: ``"/uploads"``
+    :param upload_resource_name:
+        By default ``aiohttp-tus`` will provide auto name for the upload resource, as
+        well as for the chunk resource. But sometimes it might be useful to provide
+        exact name, which can lately be used for URL reversing.
     :param allow_overwrite_files:
         When enabled allow to overwrite already uploaded files. This may harm
         consistency of stored data, cause please use this param with caution. By
@@ -78,6 +83,7 @@ def setup_tus(
     config = Config(
         upload_path=upload_path,
         upload_url=upload_url,
+        upload_resource_name=upload_resource_name,
         allow_overwrite_files=allow_overwrite_files,
         on_upload_done=on_upload_done,
         json_dumps=json_dumps,

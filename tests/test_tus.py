@@ -36,6 +36,7 @@ def aiohttp_test_client(aiohttp_client):
     async def factory(
         *,
         upload_url: str,
+        upload_resource_name: str = None,
         upload_suffix: str = None,
         allow_overwrite_files: bool = False,
         on_upload_done: ResourceCallback = None,
@@ -47,6 +48,7 @@ def aiohttp_test_client(aiohttp_client):
                 web.Application(),
                 upload_path=base_path / upload_suffix if upload_suffix else base_path,
                 upload_url=upload_url,
+                upload_resource_name=upload_resource_name,
                 allow_overwrite_files=allow_overwrite_files,
                 on_upload_done=on_upload_done,
                 decorator=decorator,
@@ -231,4 +233,17 @@ async def test_upload_large_file(aiohttp_test_client, loop):
         with open(TEST_SCREENSHOT_PATH, "rb") as handler:
             await loop.run_in_executor(
                 None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
+            )
+
+
+async def test_upload_resource_name(aiohttp_test_client, loop):
+    upload = partial(tus.upload, file_name=TEST_FILE_NAME)
+
+    async with aiohttp_test_client(
+        upload_url=TEST_UPLOAD_URL, upload_resource_name="upload"
+    ) as client:
+        upload_url = client.app.router["upload"].url_for()
+        with open(TEST_FILE_PATH, "rb") as handler:
+            await loop.run_in_executor(
+                None, upload, handler, get_upload_url(client, upload_url)
             )

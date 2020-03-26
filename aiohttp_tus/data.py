@@ -18,6 +18,8 @@ class Config:
     upload_path: Path
     upload_url: str
 
+    upload_resource_name: Optional[str] = None
+
     allow_overwrite_files: bool = False
     on_upload_done: Optional["ResourceCallback"] = None
 
@@ -41,11 +43,19 @@ class Config:
 
     @property
     def resource_tus_resource_name(self) -> str:
-        return f"tus_resource_{self.upload_url_id}"
+        return (
+            f"tus_resource_{self.upload_url_id}"
+            if self.upload_resource_name is None
+            else f"{self.upload_resource_name}_resource"
+        )
 
     @property
     def resource_tus_upload_name(self) -> str:
-        return f"tus_upload_{self.upload_url_id}"
+        return (
+            f"tus_upload_{self.upload_url_id}"
+            if self.upload_resource_name is None
+            else self.upload_resource_name
+        )
 
     @property
     def upload_url_id(self) -> str:
@@ -161,7 +171,7 @@ def get_config(request: web.Request) -> Config:
     info = route.get_info()
 
     config_key = info.get("formatter") or info["path"]
-    if route.resource.name.startswith("tus_resource_"):
+    if config_key.endswith(r"/{resource_uid}"):
         config_key = get_upload_url(config_key)
 
     try:

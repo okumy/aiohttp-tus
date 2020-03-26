@@ -189,3 +189,39 @@ achieve anonymous & authenticated uploads in same time for one
         upload_url=r"/users/{username}/uploads",
         decorator=upload_user_required,
     )
+
+Upload resource name
+====================
+
+In most cases there is no need to specify :class:`aiohttp.web.Resource` name for upload
+resource, but when it is necessary, it is possible to specify custom
+``upload_resource_name`` and lately use it for URL reversing.
+
+Example below illustrates how to achieve it,
+
+In ``app.py``,
+
+.. code-block:: python
+
+    setup_tus(
+        web.Application(),
+        upload_path=(
+            Path(__file__).parent.parent / "uploads" / r"{username}"
+        ),
+        upload_url="/user/{username}/uploads",
+        upload_resource_name="user_upload",
+    )
+
+In ``views.py``,
+
+.. code-block:: python
+
+    async def user_profile(request: web.Request) -> web.Response:
+        upload_url = request.app.router["uploads"].url_for(
+            username=request.match_info["username"]
+        )
+        return aiohttp_jinja2.render(
+            "users/profile.html",
+            request,
+            {"upload_url": upload_url},
+        )
