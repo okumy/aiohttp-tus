@@ -2,8 +2,8 @@
 ChangeLog
 =========
 
-1.0.0rc1 (In Development)
-=========================
+1.0.0rc1 (2020-04-02)
+=====================
 
 - Fix upload large files via multiple chunks
 
