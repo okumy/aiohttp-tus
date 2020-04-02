@@ -85,7 +85,7 @@ async def start_upload(request: web.Request) -> web.Response:
     # Save resource and its metadata
     match_info = request.match_info
     try:
-        resource.save(config=config, match_info=match_info, chunk=b"\0")
+        resource.initial_save(config=config, match_info=match_info)
         resource.save_metadata(config=config, match_info=match_info)
     # In case if file system is not able to store given files - abort the upload
     except IOError:

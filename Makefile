@@ -24,7 +24,7 @@ SPHINXBUILD ?= $(POETRY) run sphinx-build
 TOX ?= tox
 
 # Example constants
-AIOHTTP_PORT = 8300
+AIOHTTP_PORT ?= 8300
 
 all: install
 

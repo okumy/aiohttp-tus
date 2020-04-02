@@ -1,6 +1,5 @@
-import tempfile
+import shutil
 from functools import partial
-from pathlib import Path
 
 try:
     from contextlib import asynccontextmanager
@@ -31,7 +30,7 @@ SECRET_TOKEN = "secret-token"
 
 
 @pytest.fixture
-def aiohttp_test_client(aiohttp_client):
+def aiohttp_test_client(tmp_path, aiohttp_client):
     @asynccontextmanager
     async def factory(
         *,
@@ -42,18 +41,20 @@ def aiohttp_test_client(aiohttp_client):
         on_upload_done: ResourceCallback = None,
         decorator: Decorator = None,
     ) -> TestClient:
-        with tempfile.TemporaryDirectory(prefix="aiohttp_tus") as temp_path:
-            base_path = Path(temp_path)
-            app = setup_tus(
-                web.Application(),
-                upload_path=base_path / upload_suffix if upload_suffix else base_path,
-                upload_url=upload_url,
-                upload_resource_name=upload_resource_name,
-                allow_overwrite_files=allow_overwrite_files,
-                on_upload_done=on_upload_done,
-                decorator=decorator,
-            )
+        upload_path = tmp_path / "aiohttp_tus"
+        app = setup_tus(
+            web.Application(),
+            upload_path=upload_path / upload_suffix if upload_suffix else upload_path,
+            upload_url=upload_url,
+            upload_resource_name=upload_resource_name,
+            allow_overwrite_files=allow_overwrite_files,
+            on_upload_done=on_upload_done,
+            decorator=decorator,
+        )
+        try:
             yield await aiohttp_client(app)
+        finally:
+            shutil.rmtree(upload_path, ignore_errors=True)
 
     return factory
 
@@ -224,16 +225,22 @@ async def test_upload(
         assert expected_upload_path.read_bytes() == TEST_FILE_PATH.read_bytes()
 
 
-async def test_upload_large_file(aiohttp_test_client, loop):
-    upload = partial(
-        tus.upload, file_name=TEST_SCREENSHOT_NAME, chunk_size=TEST_CHUNK_SIZE
-    )
+@pytest.mark.parametrize(
+    "chunk_size", (TEST_CHUNK_SIZE, TEST_CHUNK_SIZE * 2, TEST_CHUNK_SIZE * 4)
+)
+async def test_upload_large_file(aiohttp_test_client, loop, chunk_size):
+    upload = partial(tus.upload, file_name=TEST_SCREENSHOT_NAME, chunk_size=chunk_size)
 
     async with aiohttp_test_client(upload_url=TEST_UPLOAD_URL) as client:
         with open(TEST_SCREENSHOT_PATH, "rb") as handler:
             await loop.run_in_executor(
                 None, upload, handler, get_upload_url(client, TEST_UPLOAD_URL)
             )
+
+        config: Config = client.app[APP_TUS_CONFIG_KEY]["/uploads"]
+        expected_upload_path = config.resolve_upload_path({}) / TEST_SCREENSHOT_NAME
+        assert expected_upload_path.exists()
+        assert expected_upload_path.read_bytes() == TEST_SCREENSHOT_PATH.read_bytes()
 
 
 async def test_upload_resource_name(aiohttp_test_client, loop):

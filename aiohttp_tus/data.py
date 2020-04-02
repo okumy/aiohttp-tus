@@ -132,12 +132,29 @@ class Resource:
             metadata_header=data["metadata_header"],
         )
 
+    def initial_save(
+        self, *, config: Config, match_info: web.UrlMappingMatchInfo
+    ) -> Tuple[Path, int]:
+        return self.save(
+            config=config,
+            match_info=match_info,
+            chunk=b"\0",
+            mode="wb",
+            offset=self.file_size - 1 if self.file_size > 0 else 0,
+        )
+
     def save(
-        self, *, config: Config, match_info: web.UrlMappingMatchInfo, chunk: bytes
+        self,
+        *,
+        config: Config,
+        match_info: web.UrlMappingMatchInfo,
+        chunk: bytes,
+        mode: str = None,
+        offset: int = None,
     ) -> Tuple[Path, int]:
         path = get_resource_path(config=config, match_info=match_info, uid=self.uid)
-        with open(path, "wb+") as handler:
-            handler.seek(self.offset)
+        with open(path, mode if mode is not None else "r+b") as handler:
+            handler.seek(offset if offset is not None else self.offset)
             chunk_size = handler.write(chunk)
         return (path, chunk_size)
 
