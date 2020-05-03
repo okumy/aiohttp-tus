@@ -102,14 +102,20 @@ async def start_upload(request: web.Request) -> web.Response:
             text="Unexpected error on uploading file", headers=headers
         )
 
-    # Specify resource headers for tus client
-    headers[constants.HEADER_LOCATION] = str(
-        request.url.join(
-            request.app.router[config.resource_tus_resource_name].url_for(
-                **request.match_info, resource_uid=resource.uid
-            )
+    # location url
+    location_url = request.url.join(
+        request.app.router[config.resource_tus_resource_name].url_for(
+            **request.match_info, resource_uid=resource.uid
         )
     )
+
+    # Set Location scheme with forwarded proto header
+    original_protocol = request.headers.get(constants.HEADER_X_FORWARDED_PROTO)
+    if original_protocol is not None:
+        location_url = location_url.with_scheme(original_protocol)
+
+    # Specify resource headers for tus client
+    headers[constants.HEADER_LOCATION] = str(location_url)
     headers[constants.HEADER_TUS_TEMP_FILENAME] = resource.uid
 
     return web.Response(status=201, text="", headers=headers)

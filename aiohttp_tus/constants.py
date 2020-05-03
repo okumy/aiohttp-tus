@@ -23,3 +23,7 @@ BASE_HEADERS = {
     HEADER_TUS_RESUMABLE: TUS_API_VERSION,
     HEADER_TUS_VERSION: TUS_API_VERSION_SUPPORTED,
 }
+
+
+# Used to get original protocol from proxy servers (nginx, apache, etc.)
+HEADER_X_FORWARDED_PROTO = "X-Forwarded-Proto"
