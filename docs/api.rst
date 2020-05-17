@@ -1,3 +1,5 @@
+.. include:: meta.rst
+
 =============
 API Reference
 =============

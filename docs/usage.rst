@@ -1,3 +1,5 @@
+.. include:: meta.rst
+
 =====
 Usage
 =====
@@ -78,9 +80,11 @@ uppy.io Configuration
 CORS Headers
 ============
 
-At a moment (`Mar 26 2020`), ``aiohttp-tus`` supports setting up CORS Headers for
-``aiohttp.web`` application only via `cors_middleware <https://https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#cors-middleware>`_
-from ``aiohttp-middlewares`` package.
+At a moment (`May 17 2020`), ``aiohttp-tus`` supports setting up CORS Headers for
+``aiohttp.web`` application only via `cors_middleware <https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#cors-middleware>`_
+from `aiohttp-middlewares`_ package.
+
+.. _aiohttp-middlewares: https://aiohttp-middlewares.readthedocs.io/
 
 As ``aiohttp-tus`` registers `OPTIONS` handlers it doesn't work with
 `aiohttp-cors <https://github.com/aio-libs/aiohttp-cors>`_ library cause of known issue
@@ -90,7 +94,7 @@ As ``aiohttp-tus`` registers `OPTIONS` handlers it doesn't work with
 To enable CORS Headers for your ``aiohttp.web`` application, which is using
 ``aiohttp-tus``, you need to,
 
-1. Install `aiohttp-middlewares <https://aiohttp-middlewares.readthedocs.io>`_
+1. Install `aiohttp-middlewares`_
 2. In your `app.py`,
 
    .. code-block:: python
@@ -104,13 +108,39 @@ To enable CORS Headers for your ``aiohttp.web`` application, which is using
 
        # Allow CORS Headers for requests from http://localhost:3000
        app = web.Application(
-           middlewares=[
-               cors_middleware(origins=["http://localhost:3000"])
-           ]
+           middlewares=(
+               cors_middleware(origins=("http://localhost:3000",)),
+           )
        )
        setup_tus(
-           app,
-           upload_path=Pathlib(__file__).parent.parent / "uploads",
+           app, upload_path=Path(__file__).parent.parent / "uploads",
+       )
+
+Reverse proxy and HTTPS
+=======================
+
+When aiohttp web application with ``aiohttp-tus`` deployed under the reverse proxy
+(such as nginx), with HTTPS support **you need to** setup
+`https_middleware <https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#https-middleware>`_
+from `aiohttp-middlewares`_ package to ensure that :class:`aiohttp.web.Request`
+instance has proper schema.
+
+To use HTTPS middleware you need to,
+
+1. Install `aiohttp-middlewares`_
+2. In `app.py`,
+
+   .. code-block:: python
+
+       from pathlib import Path
+
+       from aiohttp import web
+       from aiohttp_middlewares import https_middleware
+       from aiohttp_tus import setup_tus
+
+       app = web.Application(middlewares=(https_middleware(),))
+       setup_tus(
+           app, upload_path=Path(__file__).parent.parent / "uploads"
        )
 
 User Uploads

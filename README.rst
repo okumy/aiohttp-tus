@@ -10,6 +10,10 @@ aiohttp-tus
     :target: https://github.com/pre-commit/pre-commit
     :alt: pre-commit
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: black
+
 .. image:: https://img.shields.io/pypi/v/aiohttp-tus.svg
     :target: https://pypi.org/project/aiohttp-tus/
     :alt: Latest Version
@@ -67,7 +71,30 @@ Chunk Size
 Please, make sure to configure ``client_max_size`` for ``aiohttp.web`` Application and
 supply proper ``chunkSize`` for Uppy.io or other tus.io client.
 
-`Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#understanding-tus-io-chunk-size>`_
+`Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#understanding-tus-io-chunk-size>`__
+
+CORS Headers
+============
+
+To setup CORS headers you need to use `cors_middleware <https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#cors-middleware>`_
+from `aiohttp-middlewares`_ package. `aiohttp-cors <https://pypi.org/project/aiohttp-cors/>`_
+library not supported cause of
+`aio-libs/aiohttp-cors#241 <https://github.com/aio-libs/aiohttp-cors/issues/241>`_
+issue.
+
+`Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#cors-headers>`__
+
+.. _aiohttp-middlewares: https://pypi.org/project/aiohttp-middlewares/
+
+Reverse proxy and HTTPS
+=======================
+
+When ``aiohttp`` application deployed under the reverse proxy (such as nginx) with HTTPS
+support, it is needed to use `https_middleware  <https://aiohttp-middlewares.readthedocs.io/en/latest/usage.html#https-middleware>`_
+from `aiohttp-middlewares`_ package to ensure that ``web.Request`` instance has proper
+schema.
+
+`Documentation <https://aiohttp-tus.readthedocs.io/en/latest/usage.html#reverse-proxy-and-https>`__
 
 Examples
 ========

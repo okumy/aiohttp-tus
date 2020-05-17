@@ -1,3 +1,4 @@
+.. include:: meta.rst
 .. include:: ../README.rst
 
 Installation
