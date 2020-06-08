@@ -3,13 +3,12 @@
 	coveralls \
 	distclean \
 	docs \
+	example \
 	install \
 	lint \
 	lint-only \
 	list-outdated \
-	open-docs \
 	test \
-	test-app \
 	test-only
 
 # Project constants
@@ -20,10 +19,13 @@ DOCS_DIR = ./docs
 POETRY ?= poetry
 PRE_COMMIT ?= pre-commit
 PYTHON ?= $(POETRY) run python
-SPHINXBUILD ?= $(POETRY) run sphinx-build
 TOX ?= tox
 
-# Example constants
+# Docs vars
+DOCS_HOST ?= localhost
+DOCS_PORT ?= 8242
+
+# Example vars
 AIOHTTP_PORT ?= 8300
 
 all: install
@@ -36,7 +38,7 @@ distclean: clean
 
 docs: .install
 	$(PYTHON) -m pip install -r docs/requirements.txt
-	$(MAKE) -C docs/ SPHINXBUILD="$(SPHINXBUILD)" html
+	$(POETRY) run sphinx-autobuild -B -H $(DOCS_HOST) -p $(DOCS_PORT) -b html $(DOCS_DIR)/ $(DOCS_DIR)/_build/
 
 example: .install
 ifeq ($(EXAMPLE),)
@@ -48,7 +50,7 @@ endif
 
 install: .install
 .install: pyproject.toml poetry.lock
-	$(POETRY) config virtualenvs.in-project true
+	$(POETRY) config --local virtualenvs.in-project true
 	$(POETRY) install
 	touch $@
 
@@ -60,11 +62,8 @@ lint-only:
 list-outdated: install
 	$(POETRY) show -o
 
-open-docs: docs
-	open $(DOCS_DIR)/_build/html/index.html
-
 test: install clean lint test-only
 
 test-only:
-	rm -rf tests/test-uploads/
+	-rm -rf tests/test-uploads/
 	TOXENV=$(TOXENV) $(TOX) $(TOX_ARGS) -- $(TEST_ARGS)
