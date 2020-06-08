@@ -2,6 +2,12 @@
 Changelog
 =========
 
+1.0.0 (2020-06-08)
+==================
+
+- Final **1.0.0** release, which marks ``aiohttp-tus`` as library ready to be used in
+  production
+
 1.0.0rc1 (2020-04-02)
 =====================
 
