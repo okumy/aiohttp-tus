@@ -45,7 +45,7 @@ master_doc = "index"
 
 project = "aiohttp-tus"
 description = "tus.io server implementation for aiohttp.web applications"
-copyright = "2020, Pylot"
+copyright = "2020, Okumy"
 author = "Igor Davydenko"
 
 version = ".".join(VERSION.split(".")[:2])
@@ -59,7 +59,7 @@ html_theme = "alabaster"
 html_theme_options = {
     "logo_name": True,
     "description": description,
-    "github_user": "pylotcode",
+    "github_user": "okumy",
     "github_repo": project,
     "github_banner": True,
     "github_button": True,
@@ -72,7 +72,7 @@ html_sidebars = {"**": ["about.html", "localtoc.html", "searchbox.html"]}
 htmlhelp_basename = "aiohttp-tusdoc"
 latex_elements = {}
 latex_documents = [
-    (master_doc, "aiohttp-tus.tex", "aiohttp-tus Documentation", "Pylot", "manual",)
+    (master_doc, "aiohttp-tus.tex", "aiohttp-tus Documentation", "Okumy", "manual",)
 ]
 
 man_pages = [(master_doc, "aiohttp-tus", "aiohttp-tus Documentation", [author], 1,)]
