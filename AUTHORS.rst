@@ -2,7 +2,7 @@
 Authors & Contributors
 ======================
 
-``aiohttp-tus`` is a `@pylotcode <https://github.com/pylotcode>`_ project, which never
+``aiohttp-tus`` is a `@okumy <https://github.com/okumy>`_ project, which never
 happened without its authors & contributors, who listed below.
 
 - `Igor Davydenko <https://github.com/playpauseandstop>`_
