@@ -4,7 +4,7 @@
 #
 #    pip-compile docs/requirements.in
 #
-aiohttp==3.6.2
+aiohttp==3.7.4
     # via -r requirements.in
 alabaster==0.7.12
     # via sphinx
@@ -68,6 +68,8 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
+typing-extensions==3.10.0.2
+    # via aiohttp
 urllib3==1.25.9
     # via requests
 yarl==1.4.2
