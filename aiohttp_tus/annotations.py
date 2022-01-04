@@ -1,7 +1,9 @@
 from typing import Any, Callable, Dict, Mapping
 
-from aiohttp.web_middlewares import _Handler as Handler
-
+try:
+    from aiohttp.web_middlewares import _Handler as Handler
+except ImportError:
+    from aiohttp.web_middlewares import Handler
 
 Decorator = Callable[[Handler], Handler]
 
