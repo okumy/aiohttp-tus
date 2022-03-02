@@ -60,7 +60,14 @@ def parse_upload_metadata(metadata_header: str) -> MappingStrBytes:
     for item in metadata_header.split(","):
         if not item:
             continue
-        key, value = item.split()
+        # The key and value MUST be separated by **a** space.
+        metadata = item.split(' ', 1)
+        # The value MAY be empty. In these cases, the space, which would normally separate the key and the value, MAY be left out.
+        if len(metadata) == 1:
+            key = metadata
+            value = ""
+        else:
+            key, value = header_data
         metadata[key] = base64.b64decode(value)
 
     return CIMultiDict(metadata)
